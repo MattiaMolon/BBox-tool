@@ -734,7 +734,7 @@
 
                 const nameParts = files[0].name.split(".")
 
-                if (nameParts[nameParts.length - 1] === "txt") {
+                if (nameParts[nameParts.length - 1] === "txt" || nameParts[nameParts.length - 1] === "names") {
                     const reader = new FileReader()
 
                     reader.addEventListener("load", () => {
@@ -1028,8 +1028,12 @@
                         // Prepare data for yolo format
                         const x = (bbox.x + bbox.width / 2) / image.width
                         const y = (bbox.y + bbox.height / 2) / image.height
-                        const width = bbox.width / image.width
-                        const height = bbox.height / image.height
+                        let width = bbox.width / image.width
+                        let height = bbox.height / image.height
+                        if (width > 1.0)
+                            width = "1.0"
+                        if (height > 1.0)
+                            height = "1.0"
 
                         result.push(`${classes[className]} ${x} ${y} ${width} ${height}`)
                     }
