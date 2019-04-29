@@ -8,7 +8,7 @@ A fast and efficient BBox annotation tool for images in YOLO, VOC and COCO forma
 4. Load images and classes and start bboxing!
 
 ## CONFIGURATION
-1. Open boobs.js.
+1. Open bboxes-tool.js.
 2. Edit section named `parameters`.
 
 ## COMPATIBILITY

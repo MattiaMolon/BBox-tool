@@ -19,7 +19,7 @@
     const edgeSize = 5 // Resize activation area in pixels
     const resetCanvasOnChange = true // Whether to return to default position and zoom on image change
     const defaultScale = 0.5 // Default zoom level for images. Can be overridden with fittedZoom
-    const drawCenterX = true // Whether to draw a cross in the middle of bbox
+    const drawCenterX = false // Whether to draw a cross in the middle of bbox
     const drawGuidelines = true // Whether to draw guidelines for cursor
     const fittedZoom = true // Whether to fit image in the screen by it's largest dimension. Overrides defaultScale
 
