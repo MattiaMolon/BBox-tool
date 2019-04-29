@@ -77,6 +77,11 @@ hr {
     margin-top: 10px;
 }
 
+#confInput {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
 #vocFolder {
     width: 95px;
 }

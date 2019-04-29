@@ -22,6 +22,7 @@
     const drawCenterX = false // Whether to draw a cross in the middle of bbox
     const drawGuidelines = true // Whether to draw guidelines for cursor
     const fittedZoom = true // Whether to fit image in the screen by it's largest dimension. Overrides defaultScale
+    var minConfidence = 0.0 // minimum confidence to filter bboxes to visualize
 
     // Main containers
     let canvas = null
@@ -66,12 +67,12 @@
         let r = Math.floor(Math.random() * 256)
         let g = Math.floor(Math.random() * 256)
         let b = Math.floor(Math.random() * 256)
-        let a = 0.3
-        
-        return "rgba(" +r+ ", " +g+ ", " +b+ ", " +a+ ")"
+        let a = 0.25
+
+        return "rgba(" + r + ", " + g + ", " + b + ", " + a + ")"
     }
 
-    const isSupported = ()  => {
+    const isSupported = () => {
         try {
             const key = "__some_random_key_1234%(*^()^)___"
 
@@ -112,7 +113,16 @@
             listenKeyboard()
             listenImageSearch()
             listenImageCrop()
+            listenConfidenceButton()
         }
+    }
+
+    // set new confidence value
+    const listenConfidenceButton = () => {
+        document.getElementById("confButton").addEventListener("click", () => {
+            let confidenceLevel = document.getElementById("confInput").value
+            minConfidence = parseFloat(confidenceLevel)
+        })
     }
 
     const listenCanvas = () => {
@@ -166,17 +176,21 @@
 
         for (let className in currentBboxes) {
             currentBboxes[className].forEach(bbox => {
-                setFontStyles(context, bbox.marked, bbox.color)
-                context.fillText(className + " - " + bbox.confidence, zoomX(bbox.x), zoomY(bbox.y - 2))
+                if (parseFloat(bbox.confidence) * 100.0 >= minConfidence) {
+                    let percentage = parseFloat(bbox.confidence) * 100.0
+                    let title = className + " - (" + percentage + "%)" //title to print on top of bboxes
+                    setFontStyles(context, bbox.marked, bbox.color)
+                    context.fillText(title, zoomX(bbox.x), zoomY(bbox.y - 2))
 
-                setBBoxStyles(context, bbox.marked, bbox.color)
-                context.strokeRect(zoomX(bbox.x), zoomY(bbox.y), zoom(bbox.width), zoom(bbox.height))
-                context.fillRect(zoomX(bbox.x), zoomY(bbox.y), zoom(bbox.width), zoom(bbox.height))
+                    setBBoxStyles(context, bbox.marked, bbox.color)
+                    context.strokeRect(zoomX(bbox.x), zoomY(bbox.y), zoom(bbox.width), zoom(bbox.height))
+                    context.fillRect(zoomX(bbox.x), zoomY(bbox.y), zoom(bbox.width), zoom(bbox.height))
 
-                drawX(context, bbox.x, bbox.y, bbox.width, bbox.height)
+                    drawX(context, bbox.x, bbox.y, bbox.width, bbox.height)
 
-                if (bbox.marked === true) {
-                    setBboxCoordinates(bbox.x, bbox.y, bbox.width, bbox.height)
+                    if (bbox.marked === true) {
+                        setBboxCoordinates(bbox.x, bbox.y, bbox.width, bbox.height)
+                    }
                 }
             })
         }
@@ -245,7 +259,7 @@
     }
 
     const listenCanvasMouse = () => {
-        canvas.element.addEventListener("wheel", trackWheel, {passive: false})
+        canvas.element.addEventListener("wheel", trackWheel, { passive: false })
         canvas.element.addEventListener("mousemove", trackPointer)
         canvas.element.addEventListener("mousedown", trackPointer)
         canvas.element.addEventListener("mouseup", trackPointer)
@@ -329,6 +343,7 @@
             height: movedHeight,
             marked: true,
             class: currentClass,
+            confidence: 1.0,
             color: getRandomColor()
         }
 
@@ -553,7 +568,7 @@
         }
     }
 
-    const panImage= (xx, yy) => {
+    const panImage = (xx, yy) => {
         if (mouse.buttonR === true) {
             canvasX -= mouse.realX - xx
             canvasY -= mouse.realY - yy
@@ -855,7 +870,7 @@
                         }
                     })
 
-                    if (extension === "txt" || extension === "xml"  || extension === "json") {
+                    if (extension === "txt" || extension === "xml" || extension === "json") {
                         reader.readAsText(files[i])
                     } else {
                         reader.readAsArrayBuffer(event.target.files[i])
@@ -910,7 +925,7 @@
 
                                     let conf = parseFloat(cols[5])
                                     if (isNaN(conf)) {
-                                        conf = 100.0
+                                        conf = 1.0
                                     }
 
                                     bbox[className].push({
@@ -958,7 +973,7 @@
                                         height: parseInt(bndBoxMaxY) - parseInt(bndBoxY),
                                         marked: false,
                                         class: className,
-                                        confidence: 100.0,
+                                        confidence: 1.0,
                                         color: getRandomColor()
                                     })
 
@@ -1020,7 +1035,7 @@
                             height: bboxHeight,
                             marked: false,
                             class: className,
-                            confidence: 100.0,
+                            confidence: 1.0,
                             color: getRandomColor()
                         })
 
@@ -1048,24 +1063,26 @@
                     for (let i = 0; i < bboxes[imageName][className].length; i++) {
                         const bbox = bboxes[imageName][className][i]
 
-                        // Prepare data for yolo format
-                        const x = (bbox.x + bbox.width / 2) / image.width
-                        const y = (bbox.y + bbox.height / 2) / image.height
-                        let width = bbox.width / image.width
-                        let height = bbox.height / image.height
-                        if (width > 1.0)
-                            width = "1.0"
-                        if (height > 1.0)
-                            height = "1.0"
+                        if (parseFloat(bbox.confidence) * 100.0 >= minConfidence) {
+                            // Prepare data for yolo format
+                            const x = (bbox.x + bbox.width / 2) / image.width
+                            const y = (bbox.y + bbox.height / 2) / image.height
+                            let width = bbox.width / image.width
+                            let height = bbox.height / image.height
+                            if (width > 1.0)
+                                width = "1.0"
+                            if (height > 1.0)
+                                height = "1.0"
 
-                        result.push(`${classes[className]} ${x} ${y} ${width} ${height}`)
+                            result.push(`${classes[className]} ${x} ${y} ${width} ${height}`)
+                        }
                     }
                 }
 
                 zip.file(name.join("."), result.join("\n"))
             }
 
-            zip.generateAsync({type: "blob"})
+            zip.generateAsync({ type: "blob" })
                 .then((blob) => {
                     saveAs(blob, "bboxes_yolo.zip")
                 })
@@ -1131,7 +1148,7 @@
                 }
             }
 
-            zip.generateAsync({type: "blob"})
+            zip.generateAsync({ type: "blob" })
                 .then((blob) => {
                     saveAs(blob, "bboxes_voc.zip")
                 })
@@ -1198,7 +1215,7 @@
                 zip.file("coco.json", JSON.stringify(result))
             }
 
-            zip.generateAsync({type: "blob"})
+            zip.generateAsync({ type: "blob" })
                 .then((blob) => {
                     saveAs(blob, "bboxes_coco.zip")
                 })
@@ -1402,7 +1419,7 @@
                                     if (--x === 0) {
                                         document.body.style.cursor = "default"
 
-                                        zip.generateAsync({type: "blob"})
+                                        zip.generateAsync({ type: "blob" })
                                             .then((blob) => {
                                                 saveAs(blob, "crops.zip")
                                             })

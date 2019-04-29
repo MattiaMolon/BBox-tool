@@ -1,3 +1,11 @@
+# 2019-04-29, v0.3.0
+* Added random color on bboxes to distinguish better one from another
+* Fixed HTML
+* Fixed bug on bboxes that could be greater than 1.0 in YOLO
+* Added confidence level to filter on diffent bboxes
+* Updated README.md
+* Added compatibility for .names files
+
 # 2019-04-08, v0.2.4
 * Fixed VOC format not exporting objects correctly.
 * Updated copyrights.
@@ -60,7 +68,6 @@ MINOR:
 * Added version to footer.
 
 # 2018-02-17, v0.1.2
-
 * Fixed CHANGELOG formatting.
 * Fixed select box not auto scrolling to selection.
 * Made sure coordinate pixels are without decimal point.
@@ -71,10 +78,8 @@ MINOR:
 * Updated README.md and screenshot to reflect changes.
     
 # 2018-02-15, v0.1.1
-
 * Fixed, so that canvas left offset doesn't cause misplacement of bboxes.
 * Fixed, that errors won't be thrown in console if image doesn't exist for a bbox.
 
 # 2018-02-14, v0.1.0
-
 * Initial release
