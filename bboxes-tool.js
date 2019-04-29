@@ -5,8 +5,8 @@
     // Parameters
     const saveInterval = 60 // Bbox recovery save in seconds
     const fontBaseSize = 30 // Text size in pixels
-    const fontColor = "#001f3f" // Base font color
-    const borderColor = "#001f3f" // Base bbox border color
+    const fontColor = "rgba(0,0,0,1)" // Base font color
+    const borderColor = "rgba(0,0,0,1)" // Base bbox border color
     const backgroundColor = "rgba(0, 116, 217, 0.2)" // Base bbox fill color
     const markedFontColor = "#FF4136" // Marked bbox font color
     const markedBorderColor = "#FF4136" // Marked bbox border color
@@ -60,6 +60,16 @@
     document.addEventListener("contextmenu", function (e) {
         e.preventDefault()
     }, false)
+
+    // return random color to distinguish bboxes
+    function getRandomColor() {
+        let r = Math.floor(Math.random() * 256)
+        let g = Math.floor(Math.random() * 256)
+        let b = Math.floor(Math.random() * 256)
+        let a = 0.3
+        
+        return "rgba(" +r+ ", " +g+ ", " +b+ ", " +a+ ")"
+    }
 
     const isSupported = ()  => {
         try {
@@ -156,10 +166,10 @@
 
         for (let className in currentBboxes) {
             currentBboxes[className].forEach(bbox => {
-                setFontStyles(context, bbox.marked)
-                context.fillText(className, zoomX(bbox.x), zoomY(bbox.y - 2))
+                setFontStyles(context, bbox.marked, bbox.color)
+                context.fillText(className + " - " + bbox.confidence, zoomX(bbox.x), zoomY(bbox.y - 2))
 
-                setBBoxStyles(context, bbox.marked)
+                setBBoxStyles(context, bbox.marked, bbox.color)
                 context.strokeRect(zoomX(bbox.x), zoomY(bbox.y), zoom(bbox.width), zoom(bbox.height))
                 context.fillRect(zoomX(bbox.x), zoomY(bbox.y), zoom(bbox.width), zoom(bbox.height))
 
@@ -205,12 +215,12 @@
         }
     }
 
-    const setBBoxStyles = (context, marked) => {
+    const setBBoxStyles = (context, marked, color) => {
         context.setLineDash([])
 
         if (marked === false) {
             context.strokeStyle = borderColor
-            context.fillStyle = backgroundColor
+            context.fillStyle = color
         } else {
             context.strokeStyle = markedBorderColor
             context.fillStyle = markedBackgroundColor
@@ -318,7 +328,8 @@
             width: movedWidth,
             height: movedHeight,
             marked: true,
-            class: currentClass
+            class: currentClass,
+            color: getRandomColor()
         }
 
         if (typeof bboxes[currentImage.name] === "undefined") {
@@ -897,14 +908,22 @@
                                     const height = cols[4] * image.height
                                     const y = cols[2] * image.height - height * 0.5
 
+                                    let conf = parseFloat(cols[5])
+                                    if (isNaN(conf)) {
+                                        conf = 100.0
+                                    }
+
                                     bbox[className].push({
                                         x: Math.floor(x),
                                         y: Math.floor(y),
                                         width: Math.floor(width),
                                         height: Math.floor(height),
                                         marked: false,
-                                        class: className
+                                        class: className,
+                                        confidence: conf,
+                                        color: getRandomColor()
                                     })
+
 
                                     break
                                 }
@@ -938,7 +957,9 @@
                                         width: parseInt(bndBoxMaxX) - parseInt(bndBoxX),
                                         height: parseInt(bndBoxMaxY) - parseInt(bndBoxY),
                                         marked: false,
-                                        class: className
+                                        class: className,
+                                        confidence: 100.0,
+                                        color: getRandomColor()
                                     })
 
                                     break
@@ -998,7 +1019,9 @@
                             width: bboxWidth,
                             height: bboxHeight,
                             marked: false,
-                            class: className
+                            class: className,
+                            confidence: 100.0,
+                            color: getRandomColor()
                         })
 
                         break
