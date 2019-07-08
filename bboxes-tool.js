@@ -7,7 +7,7 @@
     const fontBaseSize = 30 // Text size in pixels
     const fontColor = "rgba(0,0,0,1)" // Base font color
     const borderColor = "rgba(0,0,0,1)" // Base bbox border color
-    const backgroundColor = "rgba(0, 116, 217, 0.2)" // Base bbox fill color
+    const backgroundColor = "rgba(0, 116, 217, 0)" // Base bbox fill color
     const markedFontColor = "#FF4136" // Marked bbox font color
     const markedBorderColor = "#FF4136" // Marked bbox border color
     const markedBackgroundColor = "rgba(255, 133, 27, 0.2)" // Marked bbox fill color
@@ -67,7 +67,7 @@
         let r = Math.floor(Math.random() * 256)
         let g = Math.floor(Math.random() * 256)
         let b = Math.floor(Math.random() * 256)
-        let a = 0.25
+        let a = 0.20
 
         return "rgba(" + r + ", " + g + ", " + b + ", " + a + ")"
     }
@@ -231,6 +231,7 @@
 
     const setBBoxStyles = (context, marked, color) => {
         context.setLineDash([])
+        context.lineWidth = 3
 
         if (marked === false) {
             context.strokeStyle = borderColor

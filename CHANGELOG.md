@@ -1,7 +1,7 @@
 # 2019-04-29, v0.3.0
 * Added random color on bboxes to distinguish better one from another
 * Fixed HTML
-* Fixed bug on bboxes that could be greater than 1.0 in YOLO
+* Fixed bug on bboxes that could not be greater than 1.0 in YOLO
 * Added confidence level to filter on diffent bboxes
 * Updated README.md
 * Added compatibility for .names files
